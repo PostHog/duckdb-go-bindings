@@ -1,11 +1,20 @@
 name: Fetch and Push Libs
 on:
   workflow_dispatch:
+    inputs:
+      duckdb_version:
+        description: 'PostHog/duckdb release tag to fetch static libs from (e.g. v1.5.5-posthog.1)'
+        required: true
+        type: string
+
+env:
+  DUCKDB_REPO: PostHog/duckdb
+  DUCKDB_VERSION: ${{ inputs.duckdb_version }}
 jobs:
   fetch-libs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch Darwin
@@ -23,6 +32,6 @@ jobs:
           make fetch.static.libs PLATFORM=windows-amd64 FILENAME=static-libs-windows-mingw
         shell: bash
       - name: Commit
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
           commit_message: push libs
