@@ -6,6 +6,13 @@ on:
         description: 'PostHog/duckdb release tag to fetch static libs from (e.g. v1.5.5-posthog.1)'
         required: true
         type: string
+      platforms:
+        # PostHog/duckdb releases publish linux-only assets today; fetching the
+        # darwin/windows names below 404s and fails the whole run.
+        description: 'Comma-separated platforms to fetch (linux, darwin, windows)'
+        required: false
+        default: 'linux'
+        type: string
 
 env:
   DUCKDB_REPO: PostHog/duckdb
@@ -18,16 +25,19 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch Darwin
+        if: contains(inputs.platforms, 'darwin')
         run: |
           make fetch.static.libs PLATFORM=darwin-arm64 FILENAME=static-libs-osx-arm64 COPY_HEADER=1
           make fetch.static.libs PLATFORM=darwin-amd64 FILENAME=static-libs-osx-amd64
         shell: bash
       - name: Fetch Linux
+        if: contains(inputs.platforms, 'linux')
         run: |
           make fetch.static.libs PLATFORM=linux-amd64 FILENAME=static-libs-linux-amd64
           make fetch.static.libs PLATFORM=linux-arm64 FILENAME=static-libs-linux-arm64
         shell: bash
       - name: Fetch Windows
+        if: contains(inputs.platforms, 'windows')
         run: |
           make fetch.static.libs PLATFORM=windows-amd64 FILENAME=static-libs-windows-mingw
         shell: bash
